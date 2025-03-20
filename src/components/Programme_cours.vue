@@ -1,6 +1,6 @@
 <template>
   <main>
-    <h1>Projet de gestion des programmes des cours</h1>
+    <h1 class="text-red-500">Projet de gestion des programmes des cours</h1>
   </main>
 </template>
 
