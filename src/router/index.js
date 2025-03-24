@@ -1,5 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router'
 //import HomeView from '../views/HomeView.vue'
+import Inscription from '@/views/InscriptionView.vue'
+import Connexion from '@/views/ConnexionView.vue'
+import Programme_cours from '@/views/ProgrammeView.vue'
+
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -17,6 +21,23 @@ const router = createRouter({
     //   // which is lazy-loaded when the route is visited.
     //   component: () => import('../views/AboutView.vue'),
     // },
+    {
+      path: '/inscription',
+      name: 'inscription',
+      component: Inscription,
+    },
+
+    {
+      path: '/connexion',
+      name: 'connexion',
+      component: Connexion,
+    },
+
+    {
+      path: '/programme_cours',
+      name: 'accueil',
+      component: Programme_cours,
+    },
   ],
 })
 
