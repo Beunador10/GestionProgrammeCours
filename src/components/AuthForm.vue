@@ -1,11 +1,13 @@
 <template>
     <form @submit.prevent="submitForm">
+      <!-- Erreur globale du formulaire -->
+      <p v-if="formErrors" class="text-red-500 text-sm mb-4 bg-red-100 p-3 border border-red-400 rounded-md">{{ formErrors }}</p>
         <template v-if="isRegister">
-            <InputField id="nom" label="Nom" v-model="form.nom" type="text" :error="errors.nom" @input="validateForm" />
-            <InputField id="prenom" label="Prénom" v-model="form.prenom" type="text" :error="errors.prenom" @input="validateForm" />
+            <InputField id="nom" label="Nom" v-model="form.nom" type="text" :error="errors.nom" @input="validateNom" />
+            <InputField id="prenom" label="Prénom" v-model="form.prenom" type="text" :error="errors.prenom" @input="validatePrenom" />
             <div class="flex flex-col space-y-2">
                 <label class="block text-gray-700 font-medium">Sexe</label>
-                <select v-model="form.sexe" class="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-300" @change="validateForm">
+                <select v-model="form.sexe" class="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-300" @change="validateSexe">
                     <option value="">Sélectionner</option>
                     <option value="Homme">Homme</option>
                     <option value="Femme">Femme</option>
@@ -15,8 +17,8 @@
             </div>
         </template>
 
-        <InputField id="email" label="Email" v-model="form.email" type="email" :error="errors.email" @input="validateForm" />
-        <InputField id="password" label="Mot de passe" v-model="form.password" type="password" :error="errors.password" @input="validateForm" />
+        <InputField id="email" label="Email" v-model="form.email" type="email" :error="errors.email" @input="validateEmail" />
+        <InputField id="password" label="Mot de passe" v-model="form.password" type="password" :error="errors.password" @input="validatePassword" />
         
         <div v-if="!isRegister" class="mb-4 text-right">
             <a href="#" class="text-black text-sm hover:underline" @click.prevent="handleForgotPassword">Mot de passe oublié ?</a>
@@ -41,6 +43,7 @@ export default {
   },
   data() {
     return {
+      formErrors: null, // Erreur globale du formulaire
       form: {
         nom: "",
         prenom: "",
@@ -48,49 +51,93 @@ export default {
         email: "",
         password: "",
       },
-      errors: {},
+      errors: {}, // Erreurs spécifiques par champ
     };
   },
   methods: {
-    // Validation du formulaire
-    validateForm() {
-      this.errors = {};  // Réinitialiser les erreurs à chaque appel
-      let isValid = true;
-
-      if (this.isRegister) {
-        // Validation pour le nom
-        if (this.form.nom === "") {
-          this.errors.nom = "Le nom est requis.";
-          isValid = false;
-        }
-        // Validation pour le prénom
-        if (this.form.prenom === "") {
-          this.errors.prenom = "Le prénom est requis.";
-          isValid = false;
-        }
-        // Validation pour le sexe
-        if (this.form.sexe === "") {
-          this.errors.sexe = "Le sexe est requis.";
-          isValid = false;
-        }
+    // Validation individuelle des champs
+    validateNom() {
+      if (!this.form.nom) {
+        this.errors.nom = "Le nom est requis.";
+      } else {
+        this.errors.nom = null;
       }
-
-      // Validation pour l'email
-      if (this.form.email === "") {
+    },
+    validatePrenom() {
+      if (!this.form.prenom) {
+        this.errors.prenom = "Le prénom est requis.";
+      } else {
+        this.errors.prenom = null;
+      }
+    },
+    validateSexe() {
+      if (!this.form.sexe) {
+        this.errors.sexe = "Le sexe est requis.";
+      } else {
+        this.errors.sexe = null;
+      }
+    },
+    validateEmail() {
+      if (!this.form.email) {
         this.errors.email = "L'email est requis.";
-        isValid = false;
       } else if (!/\S+@\S+\.\S+/.test(this.form.email)) {
         this.errors.email = "L'email est invalide.";
-        isValid = false;
+      } else {
+        this.errors.email = null;
       }
-
-      // Validation pour le mot de passe
-      if (this.form.password === "") {
+    },
+    validatePassword() {
+      if (!this.form.password) {
         this.errors.password = "Le mot de passe est requis.";
-        isValid = false;
       } else if (this.form.password.length < 6) {
         this.errors.password = "Le mot de passe doit contenir au moins 6 caractères.";
+      } else {
+        this.errors.password = null;
+      }
+    },
+
+    // Validation complète du formulaire avant la soumission
+    validateForm() {
+      let isValid = true;
+      this.formErrors = null; // Réinitialiser l'erreur globale
+
+      // Validation des champs
+      this.validateNom();
+      this.validatePrenom();
+      this.validateSexe();
+      this.validateEmail();
+      this.validatePassword();
+
+      // 🔴 Vérifier s'il y a des erreurs en fonction du type de formulaire
+  if (this.isRegister) {
+    // Si on est en mode inscription, on vérifie toutes les erreurs
+    for (let key in this.errors) {
+      if (this.errors[key]) {
         isValid = false;
+      }
+    }
+  } else {
+    // Si c'est une connexion, on ne prend en compte que email et password
+    if (this.errors.email || this.errors.password) {
+      isValid = false;
+    }
+  }
+      
+
+      // 🔴 Ajoute cette ligne pour voir les erreurs dans la console
+      console.log("Erreurs de validation :", this.errors)
+
+      if (this.isRegister) {
+        // Validation globale
+        if (!this.form.nom || !this.form.prenom || !this.form.sexe || !this.form.email || !this.form.password) {
+          this.formErrors = "Veuillez remplir tous les champs requis.";
+          isValid = false;
+        }
+      } else {
+        if (!this.form.email || !this.form.password) {
+          this.formErrors = "Veuillez remplir tous les champs requis.";
+          isValid = false;
+        }
       }
 
       return isValid;
@@ -107,19 +154,28 @@ export default {
         this.login();
       }
     },
+    
     login() {
+
       if (this.form.email && this.form.password) {
-        console.log("Connexion réussie :", this.form);
-        this.$router.push("/programme_cours");
-      } else {
-        alert("Veuillez remplir tous les champs");
+          // Vous pouvez ici ajouter une logique de validation du backend pour vérifier les identifiants
+          // Par exemple :
+          const mockEmail = "test@example.com";
+          const mockPassword = "123456";
+
+
+        if (this.form.email == mockEmail && this.form.password == mockPassword) {
+          console.log("Connexion réussie :", this.form);
+          this.$router.push("/programme_cours");
+        } else {
+          this.formErrors = "Email ou mot de passe incorrect"
+        }
+
       }
     },
     register() {
       if (this.form.nom && this.form.prenom && this.form.sexe && this.form.email && this.form.password) {
         console.log("Inscription réussie :", this.form);
-      } else {
-        alert("Veuillez remplir tous les champs");
       }
     },
 
