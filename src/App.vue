@@ -3,6 +3,7 @@ import SideBar from './components/SideBar.vue';
 import DashboardHeader from './components/DashboardHeader.vue';
 </script>
 
+
 <template>
   <!-- Container global pleine hauteur -->
   <div class="h-screen flex overflow-hidden">
