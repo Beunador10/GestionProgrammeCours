@@ -1,11 +1,21 @@
-import axios from 'axios';
+import axios from 'axios'
+import { useAuthStore } from '@/stores/authStore'
 
 const httpClient = axios.create({
-  baseURL: 'https://jsonplaceholder.typicode.com',
-  timeout: 5000,
+  baseURL: 'http://127.0.0.1:8000',
+  timeout: 10000,
   headers: {
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
   }
-});
+})
 
-export default httpClient;
+httpClient.interceptors.request.use(config => {
+  const authStore = useAuthStore()
+  if (authStore.token) {
+    config.headers.Authorization = `Bearer ${authStore.token}`
+  }
+  return config
+})
+
+export default httpClient

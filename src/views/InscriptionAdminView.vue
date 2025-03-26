@@ -9,16 +9,17 @@
         buttonText="S'inscrire"
         :isRegister="true"
         :isAdmin="true"
+        :hideRoleField="true"
       />
     </div>
   </div>
 </template>
 
 <script>
-import AuthForm from "@/components/AuthForm.vue";
+import AuthForm from "@/components/AuthForm.vue"
 
 export default {
-  name: 'InscriptionView',
+  name: 'InscriptionAdminView',
   components: { AuthForm },
-};
+}
 </script>

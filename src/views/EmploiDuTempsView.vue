@@ -1,6 +1,7 @@
 <script setup>
-import { ref, computed} from 'vue'
+import { ref, computed } from 'vue'
 import AddEventModal from '../components/AddEventModal.vue'
+import { useAuthStore } from '@/stores/authStore'
 import {
   format,
   startOfWeek,
@@ -8,6 +9,8 @@ import {
   addWeeks
 } from 'date-fns'
 import { fr } from 'date-fns/locale'
+
+const authStore = useAuthStore()
 
 const currentWeek = ref(new Date())
 const days = ref(getWeekDays(currentWeek.value))
@@ -18,12 +21,11 @@ const selectedDay = ref(null)
 const selectedHour = ref(null)
 const selectedEvent = ref(null)
 
-// select
-const promotions = ["Licence 1", "Licence 2", "Licence 3", "Master 1", "Master 2"];
-const filieres = ["Génie Logiciel", "Sécurité Informatique", "Intelligence Artificielle", "Système d'Information et Réseau Informatique"];
+const promotions = ["Licence 1", "Licence 2", "Licence 3", "Master 1", "Master 2"]
+const filieres = ["Génie Logiciel", "Sécurité Informatique", "Intelligence Artificielle", "Système d'Information et Réseau Informatique"]
 
-const selectedPromotion = ref(promotions[0]);
-const selectedFiliere = ref(filieres[0]);
+const selectedPromotion = ref(promotions[0])
+const selectedFiliere = ref(filieres[0])
 
 function getWeekDays(date) {
   const start = startOfWeek(date, { weekStartsOn: 1, locale: fr })
@@ -44,10 +46,12 @@ function showToday() {
   currentWeek.value = new Date()
   days.value = getWeekDays(currentWeek.value)
 }
+
 function showPreviousWeek() {
   currentWeek.value = addWeeks(currentWeek.value, -1)
   days.value = getWeekDays(currentWeek.value)
 }
+
 function showNextWeek() {
   currentWeek.value = addWeeks(currentWeek.value, 1)
   days.value = getWeekDays(currentWeek.value)
@@ -65,6 +69,8 @@ const dateRangeLabel = computed(() => {
 })
 
 function openModal(day, hour) {
+  if (authStore.user?.role !== 'administrator') return
+
   const existingEvent = events.value.find(e =>
     e.day === day.value &&
     hour >= e.startHour &&
@@ -116,21 +122,20 @@ function handleFormSubmit(formData) {
     <div class="flex items-center justify-between mb-4">
       <h2 class="text-xl font-bold">Emploi du temps</h2>
       <div class="flex items-center space-x-2">
-        <!-- Select debut -->
         <div class="flex items-center bg-gray-100 rounded-xl p-2 gap-4 w-2/3">
-        <select v-model="selectedPromotion" class="bg-white border border-gray-300 rounded-md px-3 py-1 w-1/2">
-          <option v-for="promotion in promotions" :key="promotion" :value="promotion">
-            {{ promotion }}
-          </option>
-        </select>
+          <select v-model="selectedPromotion" class="bg-white border border-gray-300 rounded-md px-3 py-1 w-1/2">
+            <option v-for="promotion in promotions" :key="promotion" :value="promotion">
+              {{ promotion }}
+            </option>
+          </select>
 
-        <select v-model="selectedFiliere" class="bg-white border border-gray-300 rounded-md px-3 py-1 w-1/2">
-          <option v-for="filiere in filieres" :key="filiere" :value="filiere">
-            {{ filiere }}
-          </option>
-        </select>
-      </div>
-         <!-- select fin -->
+          <select v-model="selectedFiliere" class="bg-white border border-gray-300 rounded-md px-3 py-1 w-1/2">
+            <option v-for="filiere in filieres" :key="filiere" :value="filiere">
+              {{ filiere }}
+            </option>
+          </select>
+        </div>
+
         <button @click="showToday" class="px-4 py-2 border rounded hover:bg-gray-100">
           Aujourd'hui
         </button>
@@ -172,8 +177,12 @@ function handleFormSubmit(formData) {
           <div
             v-for="(day,) in days"
             :key="day.value + '_' + hour"
-            class="border border-gray-200 p-2 hover:bg-gray-50 cursor-pointer relative"
-            @click="openModal(day, hour)"
+            class="border border-gray-200 p-2 relative"
+            :class="{
+              'hover:bg-gray-50 cursor-pointer': authStore.user?.role === 'administrator',
+              'cursor-default': authStore.user?.role !== 'administrator'
+            }"
+            @click="authStore.user?.role === 'administrator' ? openModal(day, hour) : null"
           >
             <div
               v-for="event in events.filter(e => e.day === day.value && hour >= e.startHour && hour <= e.endHour)"
