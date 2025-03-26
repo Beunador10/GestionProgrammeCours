@@ -1,6 +1,6 @@
 <template>
   <form @submit.prevent="handleSubmit" class="space-y-4">
-    <!-- Champs d'inscription (affichés uniquement si isRegister est true) -->
+    <!-- Champs d'inscription -->
     <template v-if="isRegister">
       <div>
         <label class="block text-sm font-medium mb-2">Prénom</label>
@@ -9,8 +9,11 @@
           type="text"
           required
           class="w-full p-2 border rounded-lg"
+          @input="validateName('firstname')"
         />
+        <p v-if="errors.firstname" class="text-red-500 text-sm mt-1">{{ errors.firstname }}</p>
       </div>
+
       <div>
         <label class="block text-sm font-medium mb-2">Nom</label>
         <input
@@ -18,19 +21,25 @@
           type="text"
           required
           class="w-full p-2 border rounded-lg"
+          @input="validateName('lastname')"
         />
+        <p v-if="errors.lastname" class="text-red-500 text-sm mt-1">{{ errors.lastname }}</p>
       </div>
+
       <div>
         <label class="block text-sm font-medium mb-2">Sexe</label>
         <select
           v-model="form.sex"
           class="w-full p-2 border rounded-lg"
           required
+          @change="validateSex"
         >
           <option value="M">Masculin</option>
           <option value="F">Féminin</option>
         </select>
+        <p v-if="errors.sex" class="text-red-500 text-sm mt-1">{{ errors.sex }}</p>
       </div>
+
       <div v-if="!hideRoleField" class="mb-4">
         <label class="block text-sm font-medium mb-2">
           {{ isAdmin ? 'Fonction' : 'Grade' }}
@@ -41,7 +50,9 @@
           required
           class="w-full p-2 border rounded-lg"
           :placeholder="isAdmin ? 'Fonction (ex: Secrétaire)' : 'Grade (ex: Docteur)'"
+          @input="validateRoleField"
         />
+        <p v-if="errors.functionOrGrade" class="text-red-500 text-sm mt-1">{{ errors.functionOrGrade }}</p>
       </div>
     </template>
 
@@ -53,7 +64,9 @@
         type="email"
         required
         class="w-full p-2 border rounded-lg"
+        @input="validateEmail"
       />
+      <p v-if="errors.email" class="text-red-500 text-sm mt-1">{{ errors.email }}</p>
     </div>
 
     <div>
@@ -63,7 +76,9 @@
         type="password"
         required
         class="w-full p-2 border rounded-lg"
+        @input="validatePassword"
       />
+      <p v-if="errors.password" class="text-red-500 text-sm mt-1">{{ errors.password }}</p>
     </div>
 
     <!-- Confirmation du mot de passe pour l'inscription -->
@@ -76,57 +91,27 @@
         class="w-full p-2 border rounded-lg"
         @input="validatePassword"
       />
-      <p v-if="passwordError" class="text-red-500 text-sm mt-1">{{ passwordError }}</p>
     </div>
 
-    <div class="flex items-center justify-between">
-      <p class="text-sm">
-        {{ compte }}
-        <RouterLink :to="lien" class="text-blue-600 hover:underline">
-          {{ lienVersPage }}
-        </RouterLink>
-      </p>
-      <button
-        type="submit"
-        :disabled="loading"
-        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 w-full"
-      >
-        <span v-if="loading">Chargement...</span>
-        <span v-else>{{ buttonText }}</span>
-      </button>
+    <!-- Message d'erreur général -->
+    <div v-if="formErrors" class="text-red-500 text-sm bg-red-100 p-3 rounded-md">
+      {{ formErrors }}
     </div>
 
-    <!-- Affichage du message d'erreur en cas de problème de connexion -->
-    <p v-if="passwordError && !isRegister" class="text-red-500 text-sm text-center">
-      {{ passwordError }}
+    <button
+      type="submit"
+      :disabled="loading"
+      class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+    >
+      {{ loading ? 'Chargement...' : buttonText }}
+    </button>
+
+    <p class="text-center text-sm mt-4">
+      {{ compte }}
+      <RouterLink :to="lien" class="text-blue-500 hover:underline font-medium">
+        {{ lienVersPage }}
+      </RouterLink>
     </p>
-    <!-- Erreur globale du formulaire -->
-    <p v-if="formErrors" class="text-red-500 text-sm mb-4 bg-red-100 p-3 border border-red-400 rounded-md">{{ formErrors }}</p>
-      <template v-if="isRegister">
-          <InputField id="nom" label="Nom" v-model="form.nom" type="text" :error="errors.nom" @input="validateNom" />
-          <InputField id="prenom" label="Prénom" v-model="form.prenom" type="text" :error="errors.prenom" @input="validatePrenom" />
-          <div class="flex flex-col space-y-2">
-              <label class="block text-gray-700 font-medium">Sexe</label>
-              <select v-model="form.sexe" class="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-300" @change="validateSexe">
-                  <option value="">Sélectionner</option>
-                  <option value="Homme">Homme</option>
-                  <option value="Femme">Femme</option>
-                  <option value="Autre">Autre</option>
-              </select>
-              <p v-if="errors.sexe" class="text-red-500 text-sm">{{ errors.sexe }}</p>
-          </div>
-      </template>
-
-      <InputField id="email" label="Email" v-model="form.email" type="email" :error="errors.email" @input="validateEmail" />
-      <InputField id="password" label="Mot de passe" v-model="form.password" type="password" :error="errors.password" @input="validatePassword" />
-
-      <div v-if="!isRegister" class="mb-4 text-right">
-          <a href="#" class="text-black text-sm hover:underline" @click.prevent="handleForgotPassword">Mot de passe oublié ?</a>
-      </div>
-
-      <button type="submit" class="w-full bg-black text-white py-3 rounded-lg hover:bg-green-700">{{ buttonText }}</button>
-      <p class="text-center text-sm mt-4">{{ compte }}<router-link :to="lien" class="text-blue-500 hover:underline">{{ lienVersPage }}</router-link></p>
->>>>>>> 7e4e5c091c8c3be331818e13a1195ba280330d55
   </form>
 </template>
 
@@ -146,6 +131,7 @@ const props = defineProps({
   hideRoleField: { type: Boolean, default: false }
 })
 
+const emit = defineEmits(['submit'])
 const authStore = useAuthStore()
 const router = useRouter()
 
@@ -159,27 +145,102 @@ const form = ref({
   functionOrGrade: ''
 })
 
-const passwordError = ref('')
+const errors = ref({
+  firstname: '',
+  lastname: '',
+  sex: '',
+  email: '',
+  password: '',
+  functionOrGrade: '',
+  general: ''
+})
+
+const formErrors = ref('')
 const loading = ref(false)
 
-const validatePassword = () => {
-  if (form.value.password !== form.value.password_confirmation) {
-    passwordError.value = 'Les mots de passe ne correspondent pas'
+// Validations
+const validateName = (field) => {
+  const value = form.value[field]
+  if (!value || value.length < 2) {
+    errors.value[field] = 'Ce champ doit contenir au moins 2 caractères'
     return false
   }
-  passwordError.value = ''
+  errors.value[field] = ''
   return true
 }
 
+const validateSex = () => {
+  if (!['M', 'F'].includes(form.value.sex)) {
+    errors.value.sex = 'Veuillez sélectionner un sexe valide'
+    return false
+  }
+  errors.value.sex = ''
+  return true
+}
+
+const validateEmail = () => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (!emailRegex.test(form.value.email)) {
+    errors.value.email = 'Adresse email invalide'
+    return false
+  }
+  errors.value.email = ''
+  return true
+}
+
+const validatePassword = () => {
+  // Validation longueur minimale
+  if (form.value.password.length < 6) {
+    errors.value.password = 'Le mot de passe doit contenir au moins 6 caractères'
+    return false
+  }
+
+  // Validation confirmation mot de passe
+  if (props.isRegister && form.value.password !== form.value.password_confirmation) {
+    errors.value.password = 'Les mots de passe ne correspondent pas'
+    return false
+  }
+
+  errors.value.password = ''
+  return true
+}
+
+const validateRoleField = () => {
+  if (!form.value.functionOrGrade) {
+    errors.value.functionOrGrade = 'Ce champ est obligatoire'
+    return false
+  }
+  errors.value.functionOrGrade = ''
+  return true
+}
+
+const validateForm = () => {
+  let isValid = true
+
+  if (props.isRegister) {
+    isValid = validateName('firstname') && isValid
+    isValid = validateName('lastname') && isValid
+    isValid = validateSex() && isValid
+    if (!props.hideRoleField) {
+      isValid = validateRoleField() && isValid
+    }
+  }
+
+  isValid = validateEmail() && isValid
+  isValid = validatePassword() && isValid
+
+  return isValid
+}
+
 const handleSubmit = async () => {
-  if (props.isRegister && !validatePassword()) return
+  if (!validateForm()) return
 
   loading.value = true
+  formErrors.value = ''
 
   try {
     if (props.isRegister) {
-      // Gestion de l'inscription
-      const endpoint = props.isAdmin ? '/api/register/administrator' : '/api/register/professor'
+      // Construction du payload
       const payload = {
         firstname: form.value.firstname,
         lastname: form.value.lastname,
@@ -188,37 +249,41 @@ const handleSubmit = async () => {
         password: form.value.password,
         password_confirmation: form.value.password_confirmation
       }
+
+      // Ajout du champ spécifique
       if (props.hideRoleField) {
-        if (props.isAdmin) {
-          payload.function = "Coordonnateur"
-        } else {
-          payload.grade = "Maître Conférence"
-        }
+        payload[props.isAdmin ? 'function' : 'grade'] = props.isAdmin ? 'Coordonnateur' : 'Maître Conférence'
       } else {
-        if (props.isAdmin) {
-          payload.function = form.value.functionOrGrade
-        } else {
-          payload.grade = form.value.functionOrGrade
-        }
+        payload[props.isAdmin ? 'function' : 'grade'] = form.value.functionOrGrade
       }
-      const response = await httpClient.post(endpoint, payload)
+
+      // Appel API
+      const response = await httpClient.post(
+        props.isAdmin ? '/api/register/administrator' : '/api/register/professor',
+        payload
+      )
+
+      // Connexion automatique après inscription
       if (response.data.data) {
-        // Connexion automatique après inscription
         await authStore.login({
           email: form.value.email,
           password: form.value.password
         })
+        router.push('/emploi-du-temps')
       }
     } else {
-      // Gestion de la connexion
+      // Connexion normale
       await authStore.login({
         email: form.value.email,
         password: form.value.password
       })
+      router.push('/emploi-du-temps')
     }
   } catch (error) {
-    console.error("Erreur d'authentification:", error)
-    passwordError.value = error.message || 'Une erreur est survenue. Veuillez réessayer.'
+    console.error('Erreur:', error)
+    formErrors.value = error.response?.data?.message ||
+      error.message ||
+      'Une erreur est survenue. Veuillez réessayer.'
   } finally {
     loading.value = false
   }

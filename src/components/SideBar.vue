@@ -9,6 +9,7 @@ const authStore = useAuthStore()
 onMounted(() => {
   if (authStore.isLoggedIn) {
     console.log('Rôle actuel (au chargement) :', authStore.user?.role)
+    console.log("le token de l'utilisateur connecté est :", authStore.token)
   }
 })
 
