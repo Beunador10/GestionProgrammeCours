@@ -100,6 +100,33 @@
     <p v-if="passwordError && !isRegister" class="text-red-500 text-sm text-center">
       {{ passwordError }}
     </p>
+    <!-- Erreur globale du formulaire -->
+    <p v-if="formErrors" class="text-red-500 text-sm mb-4 bg-red-100 p-3 border border-red-400 rounded-md">{{ formErrors }}</p>
+      <template v-if="isRegister">
+          <InputField id="nom" label="Nom" v-model="form.nom" type="text" :error="errors.nom" @input="validateNom" />
+          <InputField id="prenom" label="Prénom" v-model="form.prenom" type="text" :error="errors.prenom" @input="validatePrenom" />
+          <div class="flex flex-col space-y-2">
+              <label class="block text-gray-700 font-medium">Sexe</label>
+              <select v-model="form.sexe" class="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-300" @change="validateSexe">
+                  <option value="">Sélectionner</option>
+                  <option value="Homme">Homme</option>
+                  <option value="Femme">Femme</option>
+                  <option value="Autre">Autre</option>
+              </select>
+              <p v-if="errors.sexe" class="text-red-500 text-sm">{{ errors.sexe }}</p>
+          </div>
+      </template>
+
+      <InputField id="email" label="Email" v-model="form.email" type="email" :error="errors.email" @input="validateEmail" />
+      <InputField id="password" label="Mot de passe" v-model="form.password" type="password" :error="errors.password" @input="validatePassword" />
+
+      <div v-if="!isRegister" class="mb-4 text-right">
+          <a href="#" class="text-black text-sm hover:underline" @click.prevent="handleForgotPassword">Mot de passe oublié ?</a>
+      </div>
+
+      <button type="submit" class="w-full bg-black text-white py-3 rounded-lg hover:bg-green-700">{{ buttonText }}</button>
+      <p class="text-center text-sm mt-4">{{ compte }}<router-link :to="lien" class="text-blue-500 hover:underline">{{ lienVersPage }}</router-link></p>
+>>>>>>> 7e4e5c091c8c3be331818e13a1195ba280330d55
   </form>
 </template>
 
