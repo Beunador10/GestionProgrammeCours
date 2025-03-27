@@ -1,16 +1,3 @@
-<script setup>
-import { ref } from 'vue'
-import { useAuthStore } from '@/stores/authStore'
-
-const authStore = useAuthStore()
-
-const dateTime = ref({
-  date: "8 FEB",
-  time: "10:00 AM",
-  day: "Mercredi",
-})
-</script>
-
 <template>
   <header class="py-7 flex items-center justify-between">
     <div class="flex-1 flex items-center justify-start gap-4">
@@ -18,7 +5,7 @@ const dateTime = ref({
         <p class="font-bold text-xs">{{ dateTime.date }}</p>
         <p class="text-xs">{{ dateTime.time }}</p>
       </div>
-      <p class="text-xl font-bold">{{ dateTime.day }}</p>
+      <p class="text-xl font-bold capitalize">{{ dateTime.day }}</p>
     </div>
 
     <div class="flex-1 flex items-center justify-end gap-4">
@@ -48,3 +35,19 @@ const dateTime = ref({
     </div>
   </header>
 </template>
+
+<script setup>
+import { computed } from 'vue'
+import { useAuthStore } from '@/stores/authStore'
+
+const authStore = useAuthStore()
+
+const dateTime = computed(() => {
+  const now = new Date()
+  return {
+    date: now.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }).toUpperCase(),
+    time: now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', hour12: true }),
+    day: now.toLocaleDateString('fr-FR', { weekday: 'long' })
+  }
+})
+</script>

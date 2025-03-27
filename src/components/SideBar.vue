@@ -64,12 +64,12 @@ watch(
             <span>Cours</span>
           </RouterLink>
 
-          <RouterLink
+          <!-- <RouterLink
             to="/parametre"
             class="flex items-center gap-2 px-5 py-3 hover:bg-gray-700 transition-colors"
           >
             <span>Paramètre</span>
-          </RouterLink>
+          </RouterLink> -->
         </template>
       </div>
     </div>
