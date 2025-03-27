@@ -9,7 +9,7 @@
         buttonText="S'inscrire"
         :isRegister="true"
         :isAdmin="true"
-        :hideRoleField="true"
+        :hideRoleField="true" 
       />
     </div>
   </div>
