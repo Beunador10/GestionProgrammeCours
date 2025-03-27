@@ -76,9 +76,9 @@
         type="password"
         required
         class="w-full p-2 border rounded-lg"
-        @input="validatePassword"
+        @input="validatePasswordLength"
       />
-      <p v-if="errors.password" class="text-red-500 text-sm mt-1">{{ errors.password }}</p>
+
     </div>
 
     <!-- Confirmation du mot de passe pour l'inscription -->
@@ -89,8 +89,9 @@
         type="password"
         required
         class="w-full p-2 border rounded-lg"
-        @input="validatePassword"
+        @input="validatePasswordConfirmation"
       />
+      <p v-if="errors.password" class="text-red-500 text-sm mt-1">{{ errors.password }}</p>
     </div>
 
     <!-- Message d'erreur général -->
@@ -188,19 +189,27 @@ const validateEmail = () => {
   return true
 }
 
-const validatePassword = () => {
-  // Validation longueur minimale
+/**
+ * Vérifie uniquement la longueur minimale du mot de passe.
+ */
+const validatePasswordLength = () => {
   if (form.value.password.length < 6) {
     errors.value.password = 'Le mot de passe doit contenir au moins 6 caractères'
     return false
   }
+  errors.value.password = ''
+  return true
+}
 
-  // Validation confirmation mot de passe
+/**
+ * Vérifie uniquement si le mot de passe et sa confirmation correspondent.
+ * Appelée lors de la saisie dans le champ de confirmation.
+ */
+const validatePasswordConfirmation = () => {
   if (props.isRegister && form.value.password !== form.value.password_confirmation) {
     errors.value.password = 'Les mots de passe ne correspondent pas'
     return false
   }
-
   errors.value.password = ''
   return true
 }
@@ -214,25 +223,39 @@ const validateRoleField = () => {
   return true
 }
 
+/**
+ * Valide l'ensemble du formulaire au moment de la soumission.
+ */
 const validateForm = () => {
   let isValid = true
 
+  // Si c'est une inscription, valider les champs spécifiques
   if (props.isRegister) {
     isValid = validateName('firstname') && isValid
     isValid = validateName('lastname') && isValid
     isValid = validateSex() && isValid
+
     if (!props.hideRoleField) {
       isValid = validateRoleField() && isValid
     }
   }
 
+  // Validation de l'email
   isValid = validateEmail() && isValid
-  isValid = validatePassword() && isValid
+
+  // Validation de la longueur du mot de passe
+  isValid = validatePasswordLength() && isValid
+
+  // Validation de la confirmation (uniquement si isRegister)
+  if (props.isRegister) {
+    isValid = validatePasswordConfirmation() && isValid
+  }
 
   return isValid
 }
 
 const handleSubmit = async () => {
+  // Validation globale avant soumission
   if (!validateForm()) return
 
   loading.value = true
@@ -250,9 +273,11 @@ const handleSubmit = async () => {
         password_confirmation: form.value.password_confirmation
       }
 
-      // Ajout du champ spécifique
+      // Ajout du champ spécifique (fonction ou grade)
       if (props.hideRoleField) {
-        payload[props.isAdmin ? 'function' : 'grade'] = props.isAdmin ? 'Coordonnateur' : 'Maître Conférence'
+        payload[props.isAdmin ? 'function' : 'grade'] = props.isAdmin
+          ? 'Coordonnateur'
+          : 'Maître Conférence'
       } else {
         payload[props.isAdmin ? 'function' : 'grade'] = form.value.functionOrGrade
       }
@@ -281,7 +306,8 @@ const handleSubmit = async () => {
     }
   } catch (error) {
     console.error('Erreur:', error)
-    formErrors.value = error.response?.data?.message ||
+    formErrors.value =
+      error.response?.data?.message ||
       error.message ||
       'Une erreur est survenue. Veuillez réessayer.'
   } finally {
