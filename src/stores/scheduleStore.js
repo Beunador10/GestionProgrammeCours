@@ -72,15 +72,14 @@ export const useScheduleStore = defineStore('schedule', {
      */
     async fetchWeeklySchedule(startDate, endDate) {
       try {
-        // Exemple d'URL avec query params : /api/weekly-schedule?startDate=2025-03-28&endDate=2025-04-03
-        // Assurez-vous que le backend gère bien ces paramètres et renvoie TOUTES les données dans cette plage
         const response = await httpClient.get(
           `/api/weekly-schedule?startDate=${startDate}&endDate=${endDate}`
         )
-        console.log("Emploi du temps récupéré :", response.data)
+        // j'ai les emploi du temps dans le console pour voir ce qui a été envoyé
+        //console.log("Emploi du temps récupéré :", response.data)
         this.weeklySchedule = response.data
       } catch (error) {
-        console.error("Erreur lors du chargement de l'emploi du temps hebdomadaire", error)
+        console.error("Une erreur avec la récuperation des emploi du temps", error)
       }
     }
   }

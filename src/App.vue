@@ -1,6 +1,6 @@
 <template>
   <component :is="layout">
-    <!-- Le router-view sera injecté dans le layout choisi -->
+    
   </component>
 </template>
 

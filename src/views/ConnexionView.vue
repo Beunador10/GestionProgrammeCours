@@ -17,7 +17,7 @@
         </div>
         <h2 class="text-2xl font-semibold text-center mb-2 pt-10">Connexion</h2>
         <AuthForm class="w-full" buttonText="Se connecter" :isRegister="false" />
-        <!-- Liens d'inscription -->
+        <!-- Liens d'inscription prof ou admin -->
         <div class="mt-4 text-center">
           <p>Vous n'avez pas de compte ?</p>
           <div class="flex justify-center space-x-4 mt-2">
