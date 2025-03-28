@@ -309,7 +309,7 @@ async function handleFormSubmit(formData) {
       alert("Le professeur n'est pas disponible à cette heure.")
     } else {
       console.error('Erreur lors de la programmation du cours :', error)
-      alert("Une erreur s'est produite.")
+      alert("Le professeur n'est pas disponible à cette heure")
     }
   } finally {
     closeModal()
