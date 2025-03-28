@@ -92,7 +92,7 @@ const emit = defineEmits(['close', 'submit'])
 const scheduleStore = useScheduleStore()
 
 const professeur = ref('')
-const courseId = ref('')  // ID du cours sélectionné
+const courseId = ref('')
 const startTime = ref('08:00')
 const endTime = ref('09:00')
 
@@ -107,7 +107,7 @@ const possibleEndHours = computed(() => {
   return possibleHours.filter(h => parseInt(h.split(':')[0]) >= start)
 })
 
-// Préremplissage du formulaire si un événement existe
+// Préremplir si un event est passé en props
 watch(() => props.event, (newEvent) => {
   if (newEvent) {
     professeur.value = newEvent.professeur || ''
@@ -134,7 +134,7 @@ function onSubmit() {
   const formData = {
     day: props.day,
     hour: props.hour,
-    professeur: professeur.value, // ID du professeur sélectionné
+    professeur: professeur.value,
     courseId: courseId.value,
     startTime: startTime.value,
     endTime: endTime.value

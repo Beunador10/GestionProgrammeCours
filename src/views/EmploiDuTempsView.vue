@@ -108,18 +108,7 @@ import { useScheduleStore } from '@/stores/scheduleStore'
 const authStore = useAuthStore()
 const scheduleStore = useScheduleStore()
 
-onMounted(async () => {
-  await scheduleStore.fetchLevels()
-  await scheduleStore.fetchDepartments()
-  await scheduleStore.fetchProfessors()
-  await scheduleStore.fetchAvailableTeachers()
-  await scheduleStore.fetchCourses()
-  await scheduleStore.fetchWeeklySchedule()
-})
-
-const promotions = computed(() => scheduleStore.levels)
-const filieres = computed(() => scheduleStore.departments)
-
+// -- Variables réactives
 const currentWeek = ref(new Date())
 const days = ref(getWeekDays(currentWeek.value))
 const hours = ref([8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19])
@@ -131,46 +120,13 @@ const selectedEvent = ref(null)
 const selectedPromotion = ref('')
 const selectedFiliere = ref('')
 
-watch(promotions, (newPromotions) => {
-  if (newPromotions.length > 0 && !selectedPromotion.value) {
-    selectedPromotion.value = newPromotions[0].name
-  }
-})
-watch(filieres, (newFilieres) => {
-  if (newFilieres.length > 0 && !selectedFiliere.value) {
-    selectedFiliere.value = newFilieres[0].name
-  }
-})
-
-function getWeekDays(date) {
-  const start = startOfWeek(date, { weekStartsOn: 1, locale: fr })
-  return Array.from({ length: 6 }, (_, i) => {
-    const day = addDays(start, i)
-    return {
-      label: format(day, 'EEEE dd/MM', { locale: fr }),
-      value: format(day, 'yyyy-MM-dd')
-    }
-  })
-}
+// -- Computed
+const promotions = computed(() => scheduleStore.levels)
+const filieres = computed(() => scheduleStore.departments)
 
 const gridStyle = computed(() => {
   return `grid-template-columns: 100px repeat(${days.value.length}, 1fr);`
 })
-
-function showToday() {
-  currentWeek.value = new Date()
-  days.value = getWeekDays(currentWeek.value)
-}
-
-function showPreviousWeek() {
-  currentWeek.value = addWeeks(currentWeek.value, -1)
-  days.value = getWeekDays(currentWeek.value)
-}
-
-function showNextWeek() {
-  currentWeek.value = addWeeks(currentWeek.value, 1)
-  days.value = getWeekDays(currentWeek.value)
-}
 
 const monthLabel = computed(() => {
   return format(currentWeek.value, 'MMMM yyyy', { locale: fr })
@@ -183,12 +139,59 @@ const dateRangeLabel = computed(() => {
   return `Semaine du ${first.label} au ${last.label}`
 })
 
-const getEventDuration = (event) => {
+// -- Lifecycle
+onMounted(async () => {
+  // On charge toutes les données utiles
+  await scheduleStore.fetchLevels()
+  await scheduleStore.fetchDepartments()
+  await scheduleStore.fetchProfessors()
+  await scheduleStore.fetchAvailableTeachers()
+  await scheduleStore.fetchCourses()
+
+  // On récupère l'emploi du temps de la semaine en cours
+  const startDate = days.value[0].value  // ex: '2025-03-28'
+  const endDate = days.value[days.value.length - 1].value // ex: '2025-04-03'
+  await scheduleStore.fetchWeeklySchedule(startDate, endDate)
+})
+
+// -- Watchers
+watch(promotions, (newPromotions) => {
+  if (newPromotions.length > 0 && !selectedPromotion.value) {
+    selectedPromotion.value = newPromotions[0].name
+  }
+})
+watch(filieres, (newFilieres) => {
+  if (newFilieres.length > 0 && !selectedFiliere.value) {
+    selectedFiliere.value = newFilieres[0].name
+  }
+})
+
+// -- Fonctions
+function getWeekDays(date) {
+  const start = startOfWeek(date, { weekStartsOn: 1, locale: fr })
+  return Array.from({ length: 6 }, (_, i) => {
+    const day = addDays(start, i)
+    return {
+      label: format(day, 'EEEE dd/MM', { locale: fr }),
+      value: format(day, 'yyyy-MM-dd')
+    }
+  })
+}
+
+/**
+ * Calcule la durée (en heures) d'un event
+ * pour la hauteur proportionnelle dans la case
+ */
+function getEventDuration(event) {
   const start = parseInt(event.hour_Start.split(':')[0])
   const end = parseInt(event.hour_End.split(':')[0])
   return end - start
 }
 
+/**
+ * Filtre localement (front) les events stockés dans scheduleStore.weeklySchedule
+ * pour n'afficher que ceux qui correspondent au "jour" (dayValue) et à l'heure (hour)
+ */
 function weeklyScheduleFiltered(dayValue, hour) {
   const levelSelected = scheduleStore.levels.find(l => l.name === selectedPromotion.value)
   const departmentSelected = scheduleStore.departments.find(d => d.name === selectedFiliere.value)
@@ -208,15 +211,20 @@ function weeklyScheduleFiltered(dayValue, hour) {
   })
 }
 
+/**
+ * Ouvre la modal quand on clique dans une case
+ */
 function openModal(day, hour) {
-  if (!(authStore.user?.role === 'administrator')) return
+  if (authStore.user?.role !== 'administrator') return
 
   const existingEvent = scheduleStore.weeklySchedule.find(e => {
     const eventDay = e.day || e.date || ''
-    return eventDay === day.value &&
+    return (
+      eventDay === day.value &&
       e.hour_Start && e.hour_End &&
       hour >= parseInt(e.hour_Start.split(':')[0]) &&
       hour <= parseInt(e.hour_End.split(':')[0])
+    )
   })
 
   selectedEvent.value = existingEvent || null
@@ -227,6 +235,9 @@ function openModal(day, hour) {
   isModalOpen.value = true
 }
 
+/**
+ * Ferme la modal
+ */
 function closeModal() {
   isModalOpen.value = false
   selectedDay.value = null
@@ -234,6 +245,40 @@ function closeModal() {
   selectedEvent.value = null
 }
 
+/**
+ * Gestion de la navigation dans les semaines
+ */
+function showToday() {
+  currentWeek.value = new Date()
+  days.value = getWeekDays(currentWeek.value)
+
+  const startDate = days.value[0].value
+  const endDate = days.value[days.value.length - 1].value
+  scheduleStore.fetchWeeklySchedule(startDate, endDate)
+}
+
+function showPreviousWeek() {
+  currentWeek.value = addWeeks(currentWeek.value, -1)
+  days.value = getWeekDays(currentWeek.value)
+
+  const startDate = days.value[0].value
+  const endDate = days.value[days.value.length - 1].value
+  scheduleStore.fetchWeeklySchedule(startDate, endDate)
+}
+
+function showNextWeek() {
+  currentWeek.value = addWeeks(currentWeek.value, 1)
+  days.value = getWeekDays(currentWeek.value)
+
+  const startDate = days.value[0].value
+  const endDate = days.value[days.value.length - 1].value
+  scheduleStore.fetchWeeklySchedule(startDate, endDate)
+}
+
+/**
+ * Quand on valide la modal (ajout/modif d'un cours),
+ * on renvoie un payload, on l'enregistre, puis on recharge le planning.
+ */
 async function handleFormSubmit(formData) {
   const startHour = formData.startTime
   const endHour = formData.endTime
@@ -255,13 +300,16 @@ async function handleFormSubmit(formData) {
 
   try {
     await scheduleStore.scheduleCourse(courseId, payload)
-    await scheduleStore.fetchWeeklySchedule()
+    // On recharge l'emploi du temps pour la semaine courante
+    const startDate = days.value[0].value
+    const endDate = days.value[days.value.length - 1].value
+    await scheduleStore.fetchWeeklySchedule(startDate, endDate)
   } catch (error) {
     if (error.response?.data?.message === "Le professeur n'est pas disponible à cette heure.") {
       alert("Le professeur n'est pas disponible à cette heure.")
     } else {
       console.error('Erreur lors de la programmation du cours :', error)
-      alert("Le professeur n'est pas disponible à cette heure.")
+      alert("Une erreur s'est produite.")
     }
   } finally {
     closeModal()

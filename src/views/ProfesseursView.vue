@@ -15,7 +15,6 @@
             {{ prof.firstname }} {{ prof.lastname }}
           </h2>
           <p class="text-gray-600">{{ prof.email }}</p>
-          <p class="text-sm text-gray-500">{{ prof.grade }}</p>
         </div>
 
         <!-- Disponibilités -->
