@@ -11,7 +11,7 @@
     <div class="flex-1 flex items-center justify-end gap-4">
       <template v-if="authStore.isLoggedIn">
         <div class="rounded-full border-2 border-amber-300 w-11 h-11 overflow-hidden">
-          <!-- Photo de profil ou image de l'utilisateur -->
+          <img src="/src/assets/images/User_icon_2.svg.png" alt="profil">
         </div>
         <div class="flex items-center">
           <p class="pr-2">{{ authStore.user.lastname }}</p>
