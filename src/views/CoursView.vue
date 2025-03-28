@@ -9,40 +9,42 @@
         </div>
       </div>
       
-      <CoursGrid :courses="courses" :searchQuery="searchQuery" />
+      <!-- Utilisation directe du store pour garantir la réactivité -->
+      <CoursGrid :courses="coursStore.courses" :searchQuery="searchQuery" />
     </main>
     
-    <CoursForm v-if="showForm" @close="showForm = false" @add-course="addCourse" />
+    <CoursForm v-if="showForm" @close="showForm = false" @add-course="handleAddCourse" />
   </div>
 </template>
 
 <script>
+import { onMounted, ref } from 'vue'
+import { useCoursStore } from '@/stores/coursStore'
 import CoursGrid from "@/components/CoursGrid.vue";
 import CoursForm from "@/components/CoursForm.vue";
 
 export default {
   components: { CoursGrid, CoursForm },
-  data() {
+  setup() {
+    const coursStore = useCoursStore() // Conservez l'objet complet du store
+    const searchQuery = ref('')
+    const showForm = ref(false)
+
+    onMounted(() => {
+      coursStore.fetchCourses()
+    })
+
+    const handleAddCourse = async (course) => {
+      await coursStore.addCourse(course)
+      showForm.value = false
+    }
+
     return {
-      showForm: false,
-      searchQuery: '',
-      courses: [
-        { name: "Algèbre linéaire", sessions: 2, professors: 2 },
-        { name: "Mécanique quantique", sessions: 1, professors: 1 },
-        { name: "Programmation orientée objet", sessions: 1, professors: 1 },
-        { name: "Chimie organique", sessions: 4, professors: 3 },
-        { name: "Biologie cellulaire", sessions: 2, professors: 2 },
-        { name: "Calcul différentiel", sessions: 2, professors: 2 },
-        { name: "Thermodynamique", sessions: 1, professors: 2 },
-        { name: "Structures de données", sessions: 2, professors: 2 },
-      ],
-    };
+      coursStore,
+      searchQuery,
+      showForm,
+      handleAddCourse,
+    }
   },
-  methods: {
-    addCourse(course) {
-      this.courses.push(course);
-      this.showForm = false;
-    },
-  },
-};
+}
 </script>
