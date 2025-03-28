@@ -5,7 +5,7 @@
       <!-- Nom du cours -->
       <input type="text" v-model="course.subject_taught" placeholder="Nom du cours" class="border p-2 w-full rounded-md mb-3" />
       <!-- Durée du cours -->
-      <input type="number" v-model="course.duration" placeholder="Durée (minutes)" class="border p-2 w-full rounded-md mb-3" />
+      <input type="number" v-model="course.duration" placeholder="Durée totale" class="border p-2 w-full rounded-md mb-3" />
       <!-- Description -->
       <textarea v-model="course.description" placeholder="Description" class="border p-2 w-full rounded-md mb-3"></textarea>
       <div class="flex justify-end space-x-2">
@@ -22,7 +22,7 @@ export default {
     return {
       course: {
         subject_taught: '',
-        duration: 0,
+        duration: '',
         description: '',
       },
     };
