@@ -132,7 +132,7 @@ const props = defineProps({
   hideRoleField: { type: Boolean, default: false }
 })
 
-const emit = defineEmits(['submit'])
+// const emit = defineEmits(['submit'])
 const authStore = useAuthStore()
 const router = useRouter()
 

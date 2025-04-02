@@ -2,14 +2,15 @@
 import { RouterLink } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
 import { onMounted, watch } from 'vue'
+import { Icon } from "@iconify/vue";
 
 const authStore = useAuthStore()
 
-// Ajouter cette partie pour le logging
+// Pour afficher le token et le rôle de l'utilisateur connecté
 onMounted(() => {
   if (authStore.isLoggedIn) {
-    console.log('Rôle actuel (au chargement) :', authStore.user?.role)
-    console.log("le token de l'utilisateur connecté est :", authStore.token)
+    // console.log('Rôle actuel (au chargement) :', authStore.user?.role)
+    // console.log("Le token de l'utilisateur connecté est :", authStore.token)
   }
 })
 
@@ -17,7 +18,7 @@ watch(
   () => authStore.user,
   (newUser) => {
     if (newUser) {
-      console.log('Nouveau rôle détecté :', newUser.role)
+      // console.log('Nouveau rôle détecté :', newUser.role)
     }
   },
   { immediate: true }
@@ -33,9 +34,10 @@ watch(
         <!-- Emploi du temps (toujours visible) -->
         <RouterLink
           to="/emploi-du-temps"
+          active-class="active-link"
           class="flex items-center gap-2 px-5 py-3 hover:bg-gray-700 transition-colors"
         >
-          <!-- Icône... -->
+          <Icon icon="material-symbols:calendar-month-outline" width="24" height="24" />
           <span>Emploi du temps</span>
         </RouterLink>
 
@@ -43,8 +45,10 @@ watch(
         <RouterLink
           v-if="authStore.isLoggedIn && (authStore.user.role === 'professor')"
           to="/disponibilite"
+          active-class="active-link"
           class="flex items-center gap-2 px-5 py-3 hover:bg-gray-700 transition-colors"
         >
+          <Icon icon="material-symbols:event-available" width="auto" height="auto" />
           <span>Disponibilité</span>
         </RouterLink>
 
@@ -52,20 +56,25 @@ watch(
         <template v-if="authStore.isLoggedIn && authStore.user.role === 'administrator'">
           <RouterLink
             to="/professeurs"
+            active-class="active-link"
             class="flex items-center gap-2 px-5 py-3 hover:bg-gray-700 transition-colors"
           >
+            <Icon icon="material-symbols:group" width="auto" height="auto" />
             <span>Professeurs</span>
           </RouterLink>
 
           <RouterLink
             to="/cours"
+            active-class="active-link"
             class="flex items-center gap-2 px-5 py-3 hover:bg-gray-700 transition-colors"
           >
+            <Icon icon="material-symbols:menu-book" width="auto" height="auto" />
             <span>Cours</span>
           </RouterLink>
 
           <!-- <RouterLink
             to="/parametre"
+            active-class="active-link"
             class="flex items-center gap-2 px-5 py-3 hover:bg-gray-700 transition-colors"
           >
             <span>Paramètre</span>
@@ -75,3 +84,10 @@ watch(
     </div>
   </aside>
 </template>
+
+<style scoped>
+.active-link {
+  background-color: #4a5568; /* Couleur de fond pour le lien actif */
+  color: #ffffff;            /* Couleur du texte en mode actif */
+}
+</style>
