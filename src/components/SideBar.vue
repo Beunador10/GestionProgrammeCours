@@ -83,7 +83,7 @@ watch(
       </div>
     </div>
 
-    <!-- Documentation tout en bas -->
+    
     <a class="w-full px-5 py-4 border-t border-gray-700 text-sm text-gray-300 hover:text-white hover:bg-gray-700 transition-colors" href="https://documentation-programmecours.web.app/accueil" target="_blank">
         Documentation de l'app
     </a>
