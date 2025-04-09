@@ -26,7 +26,7 @@ watch(
 </script>
 
 <template>
-  <aside class="bg-gray-800 flex flex-col items-center justify-between text-white">
+  <aside class="bg-gray-800 flex flex-col items-center justify-between h-screen text-white">
     <div class="flex-1 flex-col items-center w-full">
       <h1 class="pl-5 pt-2 mb-10 text-xl font-bold">ProgrammeCours</h1>
 
@@ -82,6 +82,11 @@ watch(
         </template>
       </div>
     </div>
+
+    <!-- Documentation tout en bas -->
+    <a class="w-full px-5 py-4 border-t border-gray-700 text-sm text-gray-300 hover:text-white hover:bg-gray-700 transition-colors" href="https://documentation-programmecours.web.app/accueil" target="_blank">
+        Documentation de l'app
+    </a>
   </aside>
 </template>
 
